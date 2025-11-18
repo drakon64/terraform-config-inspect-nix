@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.nix"
+      - lon.lock
+  workflow_dispatch:
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Lix
+        uses: samueldr/lix-gha-installer-action@v2025-02-26.prerelease
+
+      - name: Install Cachix
+        uses: cachix/cachix-action@v16
+        with:
+          name: drakon64
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
+      - name: Build
+        run: cachix watch-exec drakon64 -- nix-build
+
+      - name: Create Cachix pin
+        run: cachix pin drakon64 terraform-config-inspect "$(nix eval --expr 'import ./default.nix {}' --raw --impure)" --keep-revisions 1
