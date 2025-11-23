@@ -3,10 +3,11 @@
   buildGoModule,
   lib,
   fetchFromGitHub,
+  nix-update-script,
 }:
 buildGoModule {
   pname = "terraform-config-inspect";
-  version = "2.20.1";
+  version = "0-unstable-2025-08-28";
 
   src = fetchFromGitHub {
     owner = "hashicorp";
@@ -17,7 +18,10 @@ buildGoModule {
 
   vendorHash = "sha256-iYrSk9JqxvhYSJuSv/nhZep41gRr644ZzGFWXMGQgyc=";
 
+  passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
+
   meta = {
+    mainProgram = "terraform-config-inspect";
     description = "Helper library for shallow inspection of Terraform configurations";
     homepage = "https://github.com/hashicorp/terraform-config-inspect";
     license = lib.licenses.mpl20;
